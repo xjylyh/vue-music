@@ -10,7 +10,7 @@
 </template>
 
 <script type="text/ecmascript-6">
-//import BScroll from "batter-scroll"
+import BScroll from "better-scroll"
 import {addClass} from "common/js/dom"
 export default {
     props:{
@@ -41,16 +41,27 @@ export default {
             for(let i=0;i<this.children.length;i++){
                 let child = this.children[i];
                 addClass(child,'slider-item');
-                child.style.width = sliderWidth;
-                console.log(child.offsetWidth);
+                child.style.width = sliderWidth+'px';
                 width+=sliderWidth;
             }
             if(this.loop){
-                width+=2*sliderWidth
+                width+=2*sliderWidth;
             }
             this.$refs.sliderGroup.style.width = width + "px";
+            console.log(this.$refs.sliderGroup.style.width);
         },
-        _initSlider(){}
+        _initSlider(){
+            new BScroll(this.$refs.slider,{
+                scrollX:true,
+                scrollY:false,
+                momentum:false,
+                snap:true,
+                snapLoop:this.loop,
+                snapThreshold:0.1,
+                snapSpeed:400,
+                click:true
+            })
+        }
     }
 }
 </script>
