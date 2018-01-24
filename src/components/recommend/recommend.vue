@@ -1,40 +1,57 @@
 <template>
   <div class="recommend" ref="recommend">
-    <div class="recommend-content">
-      <div v-if="recommend.length>0" class="slider-wrapper">
-        <slider>
-          <div v-for="item in recommend">
-            <a :href="item.linkUrl">
-              <img :src="item.picUrl" alt="">
-            </a>
-          </div>
-        </slider>
+    <scroll ref="scroll" :data="dicList" class="recommend-content">
+      <div>
+        <div v-if="recommend.length" class="slider-wrapper">
+          <slider>
+            <div v-for="item in recommend">
+              <a :href="item.linkUrl">
+                <img @load="loadImg" class="needsclick" :src="item.picUrl" alt="">
+              </a>
+            </div>
+          </slider>
+        </div>
+        <div class="recommend-list">
+          <h1 class="list-title">热门歌单推荐</h1>
+          <ul>
+            <li v-for="item in dicList" class="item">
+              <div class="icon">
+                <img v-lazy="item.imgurl" width="60" height="60">
+              </div>
+              <div class="text">
+                <h2 class="name" v-html="item.creator.name"></h2>
+                <p class="desc" v-html="item.dissname"></p>
+              </div>
+            </li>
+          </ul>
+        </div>
       </div>
-      <div class="recommend-list">
-        <h1 class="list-title">热门歌单推荐</h1>
-        <ul>
-
-        </ul>
+      <div class="loading-container" v-show="!dicList.length">
+        <loading></loading>
       </div>
-    </div>
+    </scroll>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
+import loading from 'base/loading/loading'
 import slider from 'base/slider/slider'
-import getRecommend from "api/recommend"
+import scroll from 'base/scroll/scroll'
+import {getRecommend,getDiscList} from "api/recommend"
 import {ERR_OK} from 'api/config'
 export default {
   data(){
     return {
-      recommend:[]
+      recommend:[],
+      dicList:[]
     }
   },
   components:{
-    slider
+    slider,scroll,loading
   },
   created(){
     this._getRecommend();
+    this._getDiscList();
   },
   methods:{
     _getRecommend(){ 
@@ -42,12 +59,25 @@ export default {
         if(res.code===ERR_OK){
           console.log(res.data.slider.length)
            for(var i=0;i<res.data.slider.length;i++){
-              res.data.slider[i].linkUrl = res.data.slider[i].linkUrl.replace(/^http/ig,'https');
               res.data.slider[i].picUrl = res.data.slider[i].picUrl.replace(/^http/ig,'https');
            }
           this.recommend = res.data.slider;
         }
       })
+    },
+    _getDiscList(){
+      getDiscList().then((res)=>{
+        if(res.code==ERR_OK){
+          this.dicList = res.data.list;
+        }
+      })
+    },
+    loadImg(){
+      if(!this.checkLoaded){
+        this.$refs.scroll.refresh();
+        this.checkLoaded = true;
+      }
+      
     }
   }
 }
