@@ -101,7 +101,7 @@ export default {
                 }
                 this.currentPageIndex = pageIndex;
                 if(this.autoplay){
-                    clearTimeout(this.time);
+                    clearTimeout(this.timer);
                     this._play();
                 }
             })
