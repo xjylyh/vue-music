@@ -9,7 +9,7 @@
       <li v-for="group in data" class="list-group" ref="listGroup">
         <h2 class="list-group-title">{{group.title}}</h2>
         <ul>
-          <li v-for="item in group.item" class="list-group-item">
+          <li @click="selectItem(item)" v-for="item in group.item" class="list-group-item">
             <img class="avatar" v-lazy="item.avatar" />
             <span class="name">{{item.name}}</span>
           </li>
@@ -76,6 +76,9 @@ const TITLE_HEIGHT = 30;
      }
    },
    methods:{
+     selectItem(item){
+       this.$emit('select',item);
+     },
      onShortcutTouchStart(event){
        const solindex = getData(event.target,'index');
        let firstTouch = event.touches[0];
