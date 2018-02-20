@@ -63,7 +63,11 @@
       </div>
     </div>
     </transition>
+<<<<<<< HEAD
     <audio :src="songurl" ref="audio"></audio>
+=======
+    <audio :src="currentSong.url" ref="audio"></audio>
+>>>>>>> 0741b288060cdca59125420f4b288f0fa604db97
   </div>
 </template>
 
@@ -71,9 +75,12 @@
 import {mapGetters,mapMutations} from 'vuex'
 import animations from 'create-keyframe-animation'
 import {prefixStyle} from 'common/js/dom'
+<<<<<<< HEAD
 import {getSongUrl} from 'api/singer'
 import {ERR_OK} from 'api/config'
 import { commonParams } from 'api/config';
+=======
+>>>>>>> 0741b288060cdca59125420f4b288f0fa604db97
 const transform = prefixStyle('transform');
   export default {
     data(){
@@ -91,7 +98,10 @@ const transform = prefixStyle('transform');
     methods:{
       back(){
         this.setFullScreen(false);
+<<<<<<< HEAD
         this.$emit('sclrefrs');
+=======
+>>>>>>> 0741b288060cdca59125420f4b288f0fa604db97
       },
       open(){
         this.setFullScreen(true);
