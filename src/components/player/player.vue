@@ -1,20 +1,193 @@
 <template>
   <div class="player" v-show="playlist.length>0">
+    <transition name="normal"
+    @enter="enter"
+    @after-enter="afterEnter"
+    @leave="leave"
+    @after-leave="afterLeave"
+    >
     <div class="normal-player" v-show="fullScreen">
-      播放器
+      <div class="background">
+        <img width="100%" height="100%" :src="currentSong.image">
+      </div>
+      <div class="top">
+        <div class="back" @click="back">
+          <i class="icon-back"></i>
+        </div>
+        <h1 class="title" v-html="currentSong.name"></h1>
+        <h2 class="subtitle"  v-html="currentSong.singer"></h2>
+      </div>
+      <div class="middle">
+        <div class="middle-l">
+          <div class="cd-wrapper" ref="cdWrapper">
+            <div class="cd">
+              <img class="image" :src="currentSong.image">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bottom">
+        <div class="operators">
+          <div class="icon i-left">
+            <i class="icon-sequence"></i>
+          </div>
+          <div class="icon i-left">
+            <i class="icon-prev"></i>
+          </div>
+          <div class="icon i-center">
+            <i class="icon-play"></i>
+          </div>
+          <div class="icon i-right">
+            <i class="icon-next"></i>
+          </div>
+          <div class="icon i-right">
+            <i class="icon icon-not-favorite"></i>
+          </div>
+        </div>
+      </div>
     </div>
-    <div class="mini-player" v-show="!fullScreen"></div>
+    </transition>
+    <transition name="mini">
+    <div class="mini-player" v-show="!fullScreen" @click="open">
+      <div class="icon">
+        <img width="40" height="40" :src="currentSong.image">
+      </div>
+      <div class="text">
+        <h2 class="name" v-html="currentSong.name"></h2>
+        <p class="desc" v-html="currentSong.singer"></p>
+      </div>
+      <div class="control"></div>
+      <div class="control">
+        <i class="icon-playlist"></i>
+      </div>
+    </div>
+    </transition>
+    <audio :src="songurl" ref="audio"></audio>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
-import {mapGetters} from 'vuex'
+import {mapGetters,mapMutations} from 'vuex'
+import animations from 'create-keyframe-animation'
+import {prefixStyle} from 'common/js/dom'
+import {getSongUrl} from 'api/singer'
+import {ERR_OK} from 'api/config'
+import { commonParams } from 'api/config';
+const transform = prefixStyle('transform');
   export default {
+    data(){
+      return {
+        songurl:''
+      }
+    },
     computed:{
       ...mapGetters([
         'fullScreen',
-        'playlist'
+        'playlist',
+        'currentSong'
       ])
+    },
+    methods:{
+      back(){
+        this.setFullScreen(false);
+        this.$emit('sclrefrs');
+      },
+      open(){
+        this.setFullScreen(true);
+      },
+      ...mapMutations({
+        'setFullScreen':'SET_FULL_SCREEN'
+      }),
+      enter(el,done){
+        const {x,y,scale} = this.getPosAndScale();
+        let animation = {
+          0:{
+            transform:`translate3d(${x}px,${y}px,0) scale(${scale})`
+          },
+          60:{
+            transform:`translate3d(0,0,0) scale(1.1)`
+          },
+          100:{
+            transform:`translate3d(0,0,0) scale(1)`
+          }
+        }
+        animations.registerAnimation({
+          name:'move',
+          animation,
+          presets:{
+            duration:400,
+            easing:'linear'
+          }
+        })
+        animations.runAnimation(this.$refs.cdWrapper,'move',done)
+      },
+      afterEnter(){
+        animations.unregisterAnimation('move');
+        this.$refs.cdWrapper.style.animation = '';
+      },
+      leave(el,done){
+        this.$refs.cdWrapper.style.transition = 'all 0.4s'
+        const {x,y,scale} = this.getPosAndScale();
+        this.$refs.cdWrapper.style[transform] = `translate3d(${x}px,${y}px,0) scale(${scale})`;
+        this.$refs.cdWrapper.addEventListener('transitionend',done);
+      },
+      afterLeave(){
+        this.$refs.cdWrapper.style.transition = '';
+        this.$refs.cdWrapper.style.transform = '';
+      },
+      getPosAndScale(){
+        const targetWidth=40;
+        const pdleft = 40;
+        const pdbottom =30;
+        const pdtop = 80;
+        const width = window.innerWidth * 0.8;
+        const scale = targetWidth/width;
+        const x = -(window.innerWidth/2 - pdleft);
+        const y = window.innerHeight-pdtop-width/2-pdbottom;
+        return {
+          x,y,scale
+        }
+      }
+    },
+    watch:{
+      currentSong(newVal){
+        console.log(newVal+'watchhhhhhhhhh');
+        const url = 'https://c.y.qq.com/base/fcgi-bin/fcg_music_express_mobile3.fcg';
+        const data = Object.assign({},commonParams,{
+            loginUin:0,
+            hostUin:0,
+            format:'json',
+            notice:0,
+            platform:'yqq',
+            needNewCode:0,
+            cid:'205361747',
+            songmid:newVal.mid,
+            uin:0,
+            inCharset:'utf8',
+            filename:`C400${newVal.mid}.m4a`,
+            guid:'5479826850'
+        })
+        this.$jsonp(url,data).then(json => {
+        　　// 返回数据 json， 返回的数据就是json格式
+            console.log('?????????????????',json);
+            if(json.code===ERR_OK){
+              this.$refs.audio.pause();
+              this.songurl = '';
+              this.songurl = `http://dl.stream.qqmusic.qq.com/${json.data.items[0].filename}?vkey=${json.data.items[0].vkey}&guid=5479826850&uin=0&fromtag=66`;
+              console.log(this.songurl);
+            }
+            this.$nextTick(()=>{
+              this.$refs.audio.play();
+            })
+        }).catch(err => {
+        　　console.log(err)
+        })
+      },
+      songurl(newVal){
+        console.log('songurlsongurlsongurlsongurl'+newVal);
+        this.songurl = newVal;
+      }
     }
   }
 </script>

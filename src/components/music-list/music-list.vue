@@ -14,7 +14,7 @@
       <div class="filter" ref="filter"></div>
     </div>
     <div class="bg-layer" ref="layer"></div>
-    <scroll @scroll="scroll" :probe-type="probeType" :listen-scroll="listenScroll" :data="songs" class="list" ref="list">
+    <scroll @sclrefrs="sclrefrs" @scroll="scroll" :probe-type="probeType" :listen-scroll="listenScroll" :data="songs" class="list" ref="list">
       <div class="song-list-wrapper">
         <song-list :songs="songs" @select="selectitem"></song-list>
       </div>
@@ -75,6 +75,9 @@ const backdrop = prefixStyle('backdrop-filter');
      },
      back(){
        this.$router.back();
+     },
+     sclrefrs(){
+       this.$refs.scroll.refresh();
      },
      selectitem(item,index){
        console.log(item,index);
