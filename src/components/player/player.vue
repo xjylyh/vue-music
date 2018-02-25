@@ -32,13 +32,13 @@
           <div class="icon i-left">
             <i class="icon-sequence"></i>
           </div>
-          <div class="icon i-left">
+          <div class="icon i-left" :class="disableCls">
             <i class="icon-prev" @click="prev"></i>
           </div>
-          <div class="icon i-center">
+          <div class="icon i-center" :class="disableCls">
             <i @click="togglePlaying" :class="playIcon"></i>
           </div>
-          <div class="icon i-right">
+          <div class="icon i-right" :class="disableCls">
             <i class="icon-next" @click="next"></i>
           </div>
           <div class="icon i-right">
@@ -93,6 +93,9 @@ const transform = prefixStyle('transform');
       },
       miniIcon(){
         return this.playing?'icon-pause-mini':'icon-play-mini';
+      },
+      disableCls(){
+        return this.songReady?'':'disable'
       },
       ...mapGetters([
         'fullScreen',
@@ -180,6 +183,7 @@ const transform = prefixStyle('transform');
           }
           this.songReady = false;
         }
+        console.log(this.songReady);
       },
       prev(){
         if(!this.songReady){
@@ -195,10 +199,11 @@ const transform = prefixStyle('transform');
         }
       },
       ready(){
-        this.songReady = true;
+        this.songReady = false;
       },
       error(){
-        
+        this.songReady = true;
+        // console.log('eeeeeeeeeeeeeeeeeeeeeeeeeeeeeerrrrrrrrrrrrrrrrrrrr')
       }
     },
     watch:{
@@ -223,13 +228,13 @@ const transform = prefixStyle('transform');
         　　// 返回数据 json， 返回的数据就是json格式
             console.log('?????????????????',json);
             if(json.code===ERR_OK){
-              this.$refs.audio.pause();
               this.songurl = '';
               this.songurl = `http://dl.stream.qqmusic.qq.com/${json.data.items[0].filename}?vkey=${json.data.items[0].vkey}&guid=5479826850&uin=0&fromtag=66`;
               console.log(this.songurl);
             }
             this.$nextTick(()=>{
               this.$refs.audio.play();
+              this.songReady = false;
             })
         }).catch(err => {
         　　console.log(err)
@@ -242,7 +247,9 @@ const transform = prefixStyle('transform');
       playing(newVal){
         const audio = this.$refs.audio;
         this.$nextTick(()=>{
-          newVal?audio.play():audio.pause();
+          if(this.$refs.audio.getAttribute('src')){
+            newVal?audio.play():audio.pause();
+          }
         })
       }
     }
