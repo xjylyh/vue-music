@@ -28,6 +28,13 @@
       </div>
 
       <div class="bottom">
+        <div class="progress-wrapper">
+          <span class="time time-l">{{forMat(currentTime)}}</span>
+          <div class="progress-bar-wrapper">
+            <ProgressBar :percent="percent" @percentChange="onProgressBarChange"></ProgressBar>
+          </div>
+          <span class="time time-r">{{forMat(currentSong.duration)}}</span>
+        </div>
         <div class="operators">
           <div class="icon i-left">
             <i class="icon-sequence"></i>
@@ -65,7 +72,7 @@
       </div>
     </div>
     </transition>
-    <audio :src="songurl" ref="audio" @canPlay="ready" @error="error"></audio>
+    <audio :src="songurl" ref="audio" @timeupdate="updateTime" @canPlay="ready" @error="error"></audio>
   </div>
 </template>
 
@@ -76,12 +83,14 @@ import {prefixStyle} from 'common/js/dom'
 import {getSongUrl} from 'api/singer'
 import {ERR_OK} from 'api/config'
 import { commonParams } from 'api/config';
+import ProgressBar from 'base/progress-bar/progress-bar'
 const transform = prefixStyle('transform');
   export default {
     data(){
       return {
         songurl:'',
-        songReady:false
+        songReady:false,
+        currentTime:0
       }
     },
     computed:{
@@ -96,6 +105,9 @@ const transform = prefixStyle('transform');
       },
       disableCls(){
         return this.songReady?'':'disable'
+      },
+      percent(){
+        return this.currentTime/this.currentSong.duration;
       },
       ...mapGetters([
         'fullScreen',
@@ -203,7 +215,29 @@ const transform = prefixStyle('transform');
       },
       error(){
         this.songReady = true;
-        // console.log('eeeeeeeeeeeeeeeeeeeeeeeeeeeeeerrrrrrrrrrrrrrrrrrrr')
+      },
+      updateTime(e){
+        this.currentTime = e.target.currentTime;
+      },
+      forMat(interval){
+        interval = interval | 0;
+        const minute = interval/60 | 0;
+        const second = this._pad(interval%60);
+        return `${minute}:${second}`
+      },
+      _pad(num,n=2){
+        let len = num.toString().length;
+        while(len<n){
+          num = '0'+num;
+          len++;
+        }
+        return num;
+      },
+      onProgressBarChange(percent){
+        this.$refs.audio.currentTime = this.currentSong.duration*percent;
+        if(!this.playing){
+          this.togglePlaying();
+        }
       }
     },
     watch:{
@@ -252,6 +286,9 @@ const transform = prefixStyle('transform');
           }
         })
       }
+    },
+    components:{
+      ProgressBar
     }
   }
 </script>
