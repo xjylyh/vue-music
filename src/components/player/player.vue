@@ -65,7 +65,9 @@
         <p class="desc" v-html="currentSong.singer"></p>
       </div>
       <div class="control">
-        <i :class="miniIcon" @click.stop="togglePlaying"></i>
+        <ProgressCircle :radius="radius" :percent="percent">
+          <i :class="miniIcon" class="icon-mini" @click.stop="togglePlaying"></i>
+        </ProgressCircle>
       </div>
       <div class="control">
         <i class="icon-playlist"></i>
@@ -84,13 +86,15 @@ import {getSongUrl} from 'api/singer'
 import {ERR_OK} from 'api/config'
 import { commonParams } from 'api/config';
 import ProgressBar from 'base/progress-bar/progress-bar'
+import ProgressCircle from 'base/progress-circle/progress-circle'
 const transform = prefixStyle('transform');
   export default {
     data(){
       return {
         songurl:'',
         songReady:false,
-        currentTime:0
+        currentTime:0,
+        radius:32
       }
     },
     computed:{
@@ -288,7 +292,7 @@ const transform = prefixStyle('transform');
       }
     },
     components:{
-      ProgressBar
+      ProgressBar,ProgressCircle
     }
   }
 </script>
