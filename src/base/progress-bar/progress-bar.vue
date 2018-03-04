@@ -61,7 +61,11 @@ export default {
       this.$refs.progressBtn.style[transform] = `translate3d(${offsetWidth}px,0,0)`
     },
     progressClick(e){//进度条的点击事件
-      this._offset(e.offsetX);//设置进度条和进度条球
+      //修复bug，点击progressBtn 的时候，offsetX不对
+      // this._offset(e.offsetX);//设置进度条和进度条球
+      const rect = this.$refs.progressBar.getBoundingClientRect();
+      const offsetWidth = e.pageX - rect.left-5;
+      this._offset(offsetWidth);
       this.triggerPercent();//计算并派发事件
     }
   },
