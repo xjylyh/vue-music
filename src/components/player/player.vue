@@ -315,6 +315,7 @@ const transform = prefixStyle('transform');
               this.$nextTick(()=>{
                 this.$refs.audio.play();
                 this.songReady = false;
+                this.currentSong.getLyric();
               })
           }).catch(err => {
           　　console.log(err)
