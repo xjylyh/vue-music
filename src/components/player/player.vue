@@ -79,16 +79,17 @@
 </template>
 
 <script type="text/ecmascript-6">
+//播放器所有功能
 import {mapGetters,mapMutations} from 'vuex'
-import animations from 'create-keyframe-animation'
-import {prefixStyle} from 'common/js/dom'
-import {getSongUrl} from 'api/singer'
-import {ERR_OK} from 'api/config'
-import { commonParams } from 'api/config';
-import ProgressBar from 'base/progress-bar/progress-bar'
-import ProgressCircle from 'base/progress-circle/progress-circle'
-import {playMode} from 'common/js/config'
-import {shuffle} from 'common/js/util'
+import animations from 'create-keyframe-animation'//动画库
+import {prefixStyle} from 'common/js/dom'//设置transform
+import {ERR_OK} from 'api/config'//状态码
+import { commonParams } from 'api/config';//jsonp接口常用配置
+import ProgressBar from 'base/progress-bar/progress-bar'//歌曲播放进度条组件
+import ProgressCircle from 'base/progress-circle/progress-circle'//mini-player播放进度条svg实现
+import {playMode} from 'common/js/config'//定义的播放状态码
+import {shuffle} from 'common/js/util'//无序排序方法，作用于随机播放状态
+import Lyric from 'lyric-parser'//处理歌词的第三方库
 const transform = prefixStyle('transform');
   export default {
     data(){
@@ -96,7 +97,8 @@ const transform = prefixStyle('transform');
         songurl:'',
         songReady:false,
         currentTime:0,
-        radius:32
+        radius:32,
+        currentLyric:null
       }
     },
     computed:{
@@ -281,6 +283,12 @@ const transform = prefixStyle('transform');
           return item.id===this.currentSong.id;
         })
         this.setCurrentIndex(index);
+      },
+      _getLyric(){
+        this.currentSong.getLyric().then((lyricstr)=>{
+          this.currentLyric = new Lyric(lyricstr);
+          console.log(this.currentLyric);
+        })
       }
     },
     watch:{
@@ -315,7 +323,7 @@ const transform = prefixStyle('transform');
               this.$nextTick(()=>{
                 this.$refs.audio.play();
                 this.songReady = false;
-                this.currentSong.getLyric();
+                this._getLyric();
               })
           }).catch(err => {
           　　console.log(err)
