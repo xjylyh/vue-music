@@ -76,6 +76,9 @@ const TITLE_HEIGHT = 30;
      }
    },
    methods:{
+     refresh(){
+       this.$refs.listview.refresh();
+     },
      selectItem(item){
        this.$emit('select',item);
      },
