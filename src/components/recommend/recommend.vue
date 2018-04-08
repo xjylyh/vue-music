@@ -50,7 +50,7 @@ export default {
   },
   components:{
     slider,scroll,loading
-  },
+  }, 
   created(){
     this._getRecommend();
     this._getDiscList();
