@@ -32,7 +32,7 @@ const SingerDetail = (resolve) => {
   })
 }
 
-const Disc = (resolve) => {
+/*const Disc = (resolve) => {
   import('components/disc/disc').then((module) => {
     resolve(module)
   })
@@ -49,6 +49,7 @@ const UserCenter = (resolve) => {
     resolve(module)
   })
 }
+*/
 export default new Router({
     routes:[
         {
